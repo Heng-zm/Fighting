@@ -1,0 +1,158 @@
+{
+  "name": "flame",
+  "displayName": "Flame",
+  "tagline": "Pyro brawler",
+  "description": "A relentless close-range fighter who turns every exchange into an inferno.",
+  "portrait": "icons/portrait.png",
+  "theme": {
+    "primary": "#ff6a00",
+    "accent": "#ffd166",
+    "glow": "rgba(255,106,0,0.55)"
+  },
+  "stats": {
+    "maxHealth": 1000,
+    "walkSpeed": 4.4,
+    "jumpPower": 16.5,
+    "weight": 1.05
+  },
+  "animations": {
+    "idle": { "sprite": "sprites/idle.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 6, "frameDuration": 110, "loop": true },
+    "walk": { "sprite": "sprites/walk.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 8, "frameDuration": 80, "loop": true },
+    "jump": { "sprite": "sprites/jump.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 4, "frameDuration": 110, "loop": false },
+    "crouch": { "sprite": "sprites/crouch.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 3, "frameDuration": 150, "loop": true },
+    "block": { "sprite": "sprites/block.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 3, "frameDuration": 120, "loop": true },
+    "light": { "sprite": "sprites/light.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 4, "frameDuration": 55, "loop": false },
+    "heavy": { "sprite": "sprites/heavy.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 5, "frameDuration": 75, "loop": false },
+    "hit": { "sprite": "sprites/hit.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 3, "frameDuration": 90, "loop": false },
+    "ko": { "sprite": "sprites/ko.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 4, "frameDuration": 140, "loop": false },
+    "special1": { "sprite": "sprites/special1.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 5, "frameDuration": 80, "loop": false },
+    "special2": { "sprite": "sprites/special2.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 5, "frameDuration": 75, "loop": false },
+    "special3": { "sprite": "sprites/special3.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 5, "frameDuration": 85, "loop": false },
+    "ult": { "sprite": "sprites/ult.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 7, "frameDuration": 100, "loop": false }
+  },
+  "moves": {
+    "light": {
+      "damage": 42,
+      "startupFrames": 4,
+      "activeFrames": 3,
+      "recoveryFrames": 7,
+      "hitbox": { "x": 24, "y": -126, "w": 68, "h": 44 },
+      "knockback": 3.5,
+      "hitstun": 12
+    },
+    "heavy": {
+      "damage": 95,
+      "startupFrames": 10,
+      "activeFrames": 5,
+      "recoveryFrames": 20,
+      "hitbox": { "x": 28, "y": -136, "w": 86, "h": 66 },
+      "knockback": 9,
+      "hitstun": 24,
+      "launch": 4
+    }
+  },
+  "skills": [
+    {
+      "id": "fireball",
+      "slot": "S1",
+      "displayName": "Fire Ball",
+      "description": "Hurl a burning orb. Applies burn for 3 seconds.",
+      "icon": "icons/fireball.png",
+      "type": "projectile",
+      "cooldown": 3,
+      "powerCost": 0,
+      "damage": 95,
+      "startupFrames": 10,
+      "recoveryFrames": 18,
+      "params": {
+        "speed": 9,
+        "lifetime": 100,
+        "pierce": false,
+        "width": 58,
+        "height": 112,
+        "hitHeight": 46,
+        "shape": "orb",
+        "color": "#ff6a00",
+        "secondary": "#ffd166",
+        "knockback": 6,
+        "hitstun": 18
+      },
+      "effects": [
+        { "type": "burn", "duration": 3, "damagePerSecond": 6 }
+      ],
+      "animation": "special1"
+    },
+    {
+      "id": "flame_dash",
+      "slot": "S2",
+      "displayName": "Flame Dash",
+      "description": "Blaze forward with a body hitbox and brief invincibility.",
+      "icon": "icons/flame_dash.png",
+      "type": "dash_attack",
+      "cooldown": 6,
+      "powerCost": 10,
+      "damage": 105,
+      "startupFrames": 8,
+      "recoveryFrames": 20,
+      "params": {
+        "speed": 18,
+        "frames": 12,
+        "hitbox": { "x": 6, "y": -146, "w": 104, "h": 96 },
+        "knockback": 9,
+        "hitstun": 20,
+        "invulnFrames": 8,
+        "color": "#ff8c42"
+      },
+      "effects": [],
+      "animation": "special2"
+    },
+    {
+      "id": "uppercut",
+      "slot": "S3",
+      "displayName": "Rising Inferno",
+      "description": "An uppercut wrapped in fire that launches nearby foes.",
+      "icon": "icons/uppercut.png",
+      "type": "area_attack",
+      "cooldown": 9,
+      "powerCost": 25,
+      "damage": 145,
+      "startupFrames": 9,
+      "recoveryFrames": 26,
+      "params": {
+        "radius": 136,
+        "verticalRange": 220,
+        "launch": 13,
+        "knockback": 8,
+        "hitstun": 30,
+        "color": "#ffb703"
+      },
+      "effects": [
+        { "type": "burn", "duration": 4, "damagePerSecond": 4 }
+      ],
+      "animation": "special3"
+    },
+    {
+      "id": "inferno_burst",
+      "slot": "ULT",
+      "displayName": "Inferno Burst",
+      "description": "Unleash a cinematic firestorm. Requires a full power gauge.",
+      "icon": "icons/inferno.png",
+      "type": "ultimate",
+      "cooldown": 8,
+      "powerCost": 100,
+      "damage": 330,
+      "startupFrames": 12,
+      "recoveryFrames": 22,
+      "params": {
+        "cinematicFrames": 160,
+        "damageAt": 82,
+        "launch": 14,
+        "color": "#ff4d00"
+      },
+      "effects": [
+        { "type": "burn", "duration": 4, "damagePerSecond": 8 }
+      ],
+      "animation": "ult"
+    }
+  ]
+}

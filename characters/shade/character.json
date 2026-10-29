@@ -1,0 +1,153 @@
+{
+  "name": "shade",
+  "displayName": "Shade",
+  "tagline": "Phantom assassin",
+  "description": "A slippery trickster who strikes from the shadows and poisons the careless.",
+  "portrait": "icons/portrait.png",
+  "theme": {
+    "primary": "#8b5cf6",
+    "accent": "#22d3ee",
+    "glow": "rgba(139,92,246,0.55)"
+  },
+  "stats": {
+    "maxHealth": 950,
+    "walkSpeed": 4.8,
+    "jumpPower": 17,
+    "weight": 0.9
+  },
+  "animations": {
+    "idle": { "sprite": "sprites/idle.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 6, "frameDuration": 100, "loop": true },
+    "walk": { "sprite": "sprites/walk.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 8, "frameDuration": 75, "loop": true },
+    "jump": { "sprite": "sprites/jump.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 4, "frameDuration": 110, "loop": false },
+    "crouch": { "sprite": "sprites/crouch.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 3, "frameDuration": 150, "loop": true },
+    "block": { "sprite": "sprites/block.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 3, "frameDuration": 120, "loop": true },
+    "light": { "sprite": "sprites/light.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 4, "frameDuration": 55, "loop": false },
+    "heavy": { "sprite": "sprites/heavy.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 5, "frameDuration": 75, "loop": false },
+    "hit": { "sprite": "sprites/hit.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 3, "frameDuration": 90, "loop": false },
+    "ko": { "sprite": "sprites/ko.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 4, "frameDuration": 140, "loop": false },
+    "special1": { "sprite": "sprites/special1.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 5, "frameDuration": 75, "loop": false },
+    "special2": { "sprite": "sprites/special2.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 5, "frameDuration": 75, "loop": false },
+    "special3": { "sprite": "sprites/special3.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 5, "frameDuration": 85, "loop": false },
+    "ult": { "sprite": "sprites/ult.png", "frameWidth": 192, "frameHeight": 192, "frameCount": 7, "frameDuration": 100, "loop": false }
+  },
+  "moves": {
+    "light": {
+      "damage": 36,
+      "startupFrames": 3,
+      "activeFrames": 3,
+      "recoveryFrames": 6,
+      "hitbox": { "x": 26, "y": -124, "w": 62, "h": 38 },
+      "knockback": 3,
+      "hitstun": 11
+    },
+    "heavy": {
+      "damage": 85,
+      "startupFrames": 9,
+      "activeFrames": 4,
+      "recoveryFrames": 18,
+      "hitbox": { "x": 30, "y": -138, "w": 80, "h": 58 },
+      "knockback": 8,
+      "hitstun": 22,
+      "launch": 3
+    }
+  },
+  "skills": [
+    {
+      "id": "shuriken",
+      "slot": "S1",
+      "displayName": "Phantom Shuriken",
+      "description": "A fast, long-range star that chips away at the opponent.",
+      "icon": "icons/shuriken.png",
+      "type": "projectile",
+      "cooldown": 2.5,
+      "powerCost": 0,
+      "damage": 70,
+      "startupFrames": 7,
+      "recoveryFrames": 14,
+      "params": {
+        "speed": 13,
+        "lifetime": 84,
+        "pierce": false,
+        "width": 42,
+        "height": 116,
+        "hitHeight": 42,
+        "shape": "shuriken",
+        "color": "#8b5cf6",
+        "secondary": "#22d3ee",
+        "knockback": 4,
+        "hitstun": 14
+      },
+      "effects": [],
+      "animation": "special1"
+    },
+    {
+      "id": "shadow_step",
+      "slot": "S2",
+      "displayName": "Shadow Step",
+      "description": "Teleport behind the opponent with invincibility frames.",
+      "icon": "icons/teleport.png",
+      "type": "teleport",
+      "cooldown": 7,
+      "powerCost": 15,
+      "damage": 0,
+      "startupFrames": 6,
+      "recoveryFrames": 13,
+      "params": {
+        "to": "behind",
+        "distance": 88,
+        "invulnFrames": 18,
+        "color": "#a855f7"
+      },
+      "effects": [],
+      "animation": "special2"
+    },
+    {
+      "id": "venom",
+      "slot": "S3",
+      "displayName": "Venom Cloud",
+      "description": "Fling toxic venom that poisons and slows the target.",
+      "icon": "icons/poison.png",
+      "type": "debuff",
+      "cooldown": 8,
+      "powerCost": 25,
+      "damage": 40,
+      "startupFrames": 10,
+      "recoveryFrames": 20,
+      "params": {
+        "range": 620,
+        "verticalRange": 280,
+        "effect": "poison",
+        "color": "#84cc16",
+        "knockback": 2,
+        "hitstun": 12
+      },
+      "effects": [
+        { "type": "poison", "duration": 5, "damagePerSecond": 8 },
+        { "type": "slow", "duration": 3, "magnitude": 0.25 }
+      ],
+      "animation": "special3"
+    },
+    {
+      "id": "phantom_strike",
+      "slot": "ULT",
+      "displayName": "Phantom Strike",
+      "description": "Vanish, then deliver a cinematic strike from the victim's shadow.",
+      "icon": "icons/phantom.png",
+      "type": "ultimate",
+      "cooldown": 10,
+      "powerCost": 100,
+      "damage": 310,
+      "startupFrames": 10,
+      "recoveryFrames": 18,
+      "params": {
+        "teleportBehind": true,
+        "cinematicFrames": 150,
+        "damageAt": 72,
+        "launch": 12,
+        "color": "#a855f7"
+      },
+      "effects": [],
+      "animation": "ult"
+    }
+  ]
+}

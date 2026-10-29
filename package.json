@@ -1,0 +1,20 @@
+{
+  "name": "shadow-clash",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shadow Clash - a server-authoritative online 2D fighting game built with Node.js, Express, Socket.IO and HTML5 Canvas.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node scripts/generateAssets.js && node server/index.js",
+    "dev": "node scripts/generateAssets.js && node --watch server/index.js",
+    "new-character": "node scripts/newCharacter.js",
+    "generate-assets": "node scripts/generateAssets.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}

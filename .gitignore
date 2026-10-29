@@ -1,0 +1,8 @@
+node_modules/
+npm-debug.log*
+.DS_Store
+*.log
+characters/*/sprites/*.png
+characters/*/icons/*.png
+!characters/flame/sprites/.gitkeep
+!characters/shade/sprites/.gitkeep

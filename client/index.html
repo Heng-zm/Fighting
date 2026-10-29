@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060f" />
+  <meta name="description" content="Shadow Clash — a free online 2D fighting game. Random matches, private rooms, skills and ultimates." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305060f'/%3E%3Cpath d='M18 16h28L32 32l14 16H18l14-16z' fill='%23ff6a00'/%3E%3C/svg%3E" />
+  <title>Shadow Clash — Online Fighting</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar" id="topbar">
+      <button class="brand-small" id="brand-home" aria-label="Main menu">
+        <span class="brand-mark">影</span>
+        <span>SHADOW<span class="brand-accent">CLASH</span></span>
+      </button>
+      <div class="topbar-right">
+        <div class="online-pill" title="Registered players currently online">
+          <span class="live-dot"></span>
+          <span id="online-count">0</span><span class="online-text"> online</span>
+        </div>
+        <button class="profile-chip" id="profile-chip" title="Edit profile">
+          <span class="avatar" id="profile-avatar">?</span>
+          <span class="profile-meta">
+            <span class="profile-name" id="profile-name">Guest</span>
+            <span class="profile-sub"><span id="profile-rating">1000</span> ELO · <span id="profile-record">0W / 0L</span></span>
+          </span>
+        </button>
+        <button class="icon-btn" id="btn-audio" title="Toggle sound" aria-label="Toggle sound">♪</button>
+      </div>
+    </header>
+
+    <main id="screens">
+      <!-- ================================================================== -->
+      <!-- MAIN MENU                                                          -->
+      <!-- ================================================================== -->
+      <section class="screen active" id="screen-menu" data-screen="menu">
+        <div class="menu-layout">
+          <div class="menu-hero">
+            <div class="eyebrow"><span></span> ONLINE ARCADE <span></span></div>
+            <h1 class="logo">SHADOW<span>CLASH</span></h1>
+            <p class="logo-sub">Two fighters. Three rounds. One shadow left standing.</p>
+            <div class="menu-stats">
+              <div><strong id="stat-online">0</strong><span>fighters online</span></div>
+              <div><strong id="stat-searching">0</strong><span>searching now</span></div>
+              <div><strong id="stat-heroes">0</strong><span>heroes ready</span></div>
+            </div>
+            <div class="menu-fighter-card">
+              <div class="menu-portrait-wrap">
+                <img id="menu-portrait" alt="" />
+                <div class="portrait-fallback" id="menu-portrait-fallback">?</div>
+              </div>
+              <div class="menu-fighter-info">
+                <span class="label">YOUR FIGHTER</span>
+                <strong id="menu-hero-name">—</strong>
+                <em id="menu-hero-tagline">—</em>
+              </div>
+              <button class="ghost-btn" id="btn-change-fighter">Change</button>
+            </div>
+          </div>
+
+          <div class="menu-panel">
+            <button class="menu-btn primary" id="btn-random">
+              <span class="menu-btn-icon">⚔</span>
+              <span><strong>Random Match</strong><small>Find a rival near your rating</small></span>
+              <span class="arrow">→</span>
+            </button>
+            <button class="menu-btn" id="btn-invite">
+              <span class="menu-btn-icon">✉</span>
+              <span><strong>Invite Friend</strong><small>Private room with a 4-letter code</small></span>
+              <span class="arrow">→</span>
+            </button>
+            <button class="menu-btn" id="btn-join">
+              <span class="menu-btn-icon">#</span>
+              <span><strong>Join by Code</strong><small>Enter a friend's room or spectate</small></span>
+              <span class="arrow">→</span>
+            </button>
+            <div class="menu-note">
+              <span class="keycap">WASD</span> move <span class="keycap">J</span>/<span class="keycap">K</span> attack <span class="keycap">L</span> block
+              <span class="keycap">U</span><span class="keycap">I</span><span class="keycap">O</span><span class="keycap">P</span> skills
+            </div>
+          </div>
+        </div>
+        <footer class="menu-footer">
+          <span>Server-authoritative 60 Hz combat</span>
+          <span>Keyboard · Gamepad · Touch</span>
+        </footer>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- CHARACTER SELECT                                                   -->
+      <!-- ================================================================== -->
+      <section class="screen" id="screen-select" data-screen="select">
+        <div class="screen-head">
+          <button class="back-btn" id="select-back">← Back</button>
+          <div>
+            <span class="eyebrow-small" id="select-context">ROSTER</span>
+            <h2>Choose your fighter</h2>
+          </div>
+          <div class="head-spacer"></div>
+        </div>
+        <div class="select-layout">
+          <div class="hero-grid" id="hero-grid"></div>
+          <aside class="hero-detail" id="hero-detail">
+            <div class="detail-empty">Select a hero to inspect their moves.</div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- MATCHMAKING                                                        -->
+      <!-- ================================================================== -->
+      <section class="screen" id="screen-search" data-screen="search">
+        <div class="search-layout" id="search-panel">
+          <div class="radar">
+            <div class="radar-ring r1"></div>
+            <div class="radar-ring r2"></div>
+            <div class="radar-ring r3"></div>
+            <div class="radar-sweep"></div>
+            <div class="radar-dot d1"></div>
+            <div class="radar-dot d2"></div>
+            <div class="radar-core">⚔</div>
+          </div>
+          <div class="search-copy">
+            <span class="eyebrow"><span></span> RANDOM MATCH <span></span></span>
+            <h2>Searching for opponent<span class="dots">...</span></h2>
+            <div class="search-timer" id="search-timer">00:00</div>
+            <p class="search-range" id="search-range">Rating window ±100</p>
+            <p class="search-waiting" id="search-waiting">Waiting for another fighter…</p>
+            <button class="btn secondary" id="btn-cancel-search">Cancel search</button>
+          </div>
+          <div class="bot-offer hidden" id="bot-offer">
+            <span class="eyebrow-small">LONG WAIT</span>
+            <h3>No rival found yet</h3>
+            <p>Keep waiting for a human, or jump straight into a CPU match.</p>
+            <div class="button-row">
+              <button class="btn primary" id="btn-fight-bot">Fight a Bot</button>
+              <button class="btn ghost" id="btn-keep-waiting">Keep waiting</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- LOBBY                                                              -->
+      <!-- ================================================================== -->
+      <section class="screen" id="screen-lobby" data-screen="lobby">
+        <div class="screen-head">
+          <button class="back-btn" id="lobby-back">← Leave room</button>
+          <div>
+            <span class="eyebrow-small" id="lobby-mode">PRIVATE ROOM</span>
+            <h2>Battle lobby</h2>
+          </div>
+          <div class="room-code-mini" id="room-code-mini-wrap">
+            <span>ROOM</span>
+            <strong id="room-code-mini">----</strong>
+          </div>
+        </div>
+
+        <div class="lobby-layout">
+          <div class="lobby-main">
+            <div class="room-code-card" id="room-code-card">
+              <div>
+                <span class="eyebrow-small">INVITE CODE</span>
+                <div class="room-code" id="room-code">----</div>
+                <p>Send this link to a friend. Room closes after 10 idle minutes.</p>
+              </div>
+              <div class="room-code-actions">
+                <button class="btn primary small" id="btn-copy-link">Copy Link</button>
+                <button class="btn ghost small" id="btn-share-room">Share</button>
+              </div>
+            </div>
+
+            <div class="lobby-slots" id="lobby-slots"></div>
+
+            <div class="lobby-actions">
+              <button class="btn primary wide" id="lobby-ready">Ready</button>
+              <button class="btn secondary" id="btn-lobby-hero">Change Fighter</button>
+              <button class="btn ghost" id="lobby-leave">Leave</button>
+            </div>
+            <p class="lobby-status" id="lobby-status">Waiting for a challenger…</p>
+          </div>
+
+          <aside class="lobby-side">
+            <div class="side-head">
+              <h3>Quick chat</h3>
+              <span>Emotes appear in the fight</span>
+            </div>
+            <div class="emote-grid" id="lobby-emotes">
+              <button data-emote="GG">GG</button>
+              <button data-emote="Nice!">Nice!</button>
+              <button data-emote="Rematch?">Rematch?</button>
+              <button data-emote="Good luck!">Good luck!</button>
+              <button data-emote="Well played!">Well played!</button>
+              <button data-emote="Oops!">Oops!</button>
+            </div>
+            <div class="spectator-note" id="spectator-note">Watching: 0</div>
+            <div class="rules-card">
+              <h4>First to 2 rounds</h4>
+              <p>99 seconds per round. Build Power by dealing and taking damage. ULT needs a full gauge.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- GAME                                                               -->
+      <!-- ================================================================== -->
+      <section class="screen game-screen" id="screen-game" data-screen="game">
+        <div class="game-frame" id="game-frame">
+          <canvas id="game-canvas" width="2560" height="1440" aria-label="Fighting arena"></canvas>
+
+          <div class="hud" id="hud">
+            <div class="hud-top">
+              <div class="fighter-hud left" id="hud-local">
+                <div class="hud-name-row">
+                  <span class="hud-name" id="hud-local-name">FIGHTER</span>
+                  <span class="hud-badge hidden" id="hud-local-bot">CPU</span>
+                </div>
+                <div class="health-wrap">
+                  <div class="health-chip" id="hud-local-health-chip"></div>
+                  <div class="health-fill" id="hud-local-health"></div>
+                  <div class="health-gloss"></div>
+                </div>
+                <div class="power-wrap">
+                  <div class="power-fill" id="hud-local-power"></div>
+                  <span id="hud-local-power-text">0</span>
+                </div>
+                <div class="hud-meta-row">
+                  <div class="pips" id="hud-local-pips"></div>
+                  <div class="status-icons" id="hud-local-statuses"></div>
+                </div>
+              </div>
+
+              <div class="hud-center">
+                <div class="round-label" id="hud-round">ROUND 1</div>
+                <div class="timer" id="hud-timer">99</div>
+                <div class="ping" id="hud-ping">PING --</div>
+              </div>
+
+              <div class="fighter-hud right" id="hud-remote">
+                <div class="hud-name-row justify-end">
+                  <span class="hud-badge hidden" id="hud-remote-bot">CPU</span>
+                  <span class="hud-name" id="hud-remote-name">FIGHTER</span>
+                </div>
+                <div class="health-wrap">
+                  <div class="health-chip" id="hud-remote-health-chip"></div>
+                  <div class="health-fill" id="hud-remote-health"></div>
+                  <div class="health-gloss"></div>
+                </div>
+                <div class="power-wrap">
+                  <div class="power-fill" id="hud-remote-power"></div>
+                  <span id="hud-remote-power-text">0</span>
+                </div>
+                <div class="hud-meta-row reverse">
+                  <div class="pips" id="hud-remote-pips"></div>
+                  <div class="status-icons" id="hud-remote-statuses"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="combo-badge hidden" id="hud-combo-local"></div>
+            <div class="combo-badge remote hidden" id="hud-combo-remote"></div>
+
+            <div class="announce" id="hud-announce">
+              <div class="announce-main" id="announce-main"></div>
+              <div class="announce-sub" id="announce-sub"></div>
+            </div>
+
+            <div class="skill-bar" id="skill-bar"></div>
+
+            <div class="quick-emotes game-emotes" id="game-emotes">
+              <button data-emote="GG">GG</button>
+              <button data-emote="Nice!">Nice!</button>
+              <button data-emote="Rematch?">Rematch?</button>
+            </div>
+
+            <div class="disconnect-banner hidden" id="disconnect-banner">
+              <span class="live-dot danger"></span>
+              <span id="disconnect-text">Opponent disconnected — 15s to reconnect</span>
+            </div>
+            <div class="disconnect-banner spectator hidden" id="spectator-banner">SPECTATING</div>
+
+            <button class="forfeit-btn" id="btn-forfeit" title="Leave match">⚑ Leave</button>
+          </div>
+
+          <div class="touch-controls" id="touch-controls">
+            <div class="joystick" id="joystick" aria-label="Virtual joystick">
+              <div class="joystick-ring"></div>
+              <div class="joystick-knob" id="joystick-knob"></div>
+              <span class="joystick-label">MOVE</span>
+            </div>
+            <div class="touch-buttons">
+              <button class="touch-btn jump" data-action="jump"><span>JUMP</span><i class="touch-cd"></i></button>
+              <button class="touch-btn block" data-action="block"><span>BLOCK</span><i class="touch-cd"></i></button>
+              <button class="touch-btn attack" data-action="light"><span>ATK</span><i class="touch-cd"></i></button>
+              <button class="touch-btn heavy" data-action="heavy"><span>HVY</span><i class="touch-cd"></i></button>
+              <button class="touch-btn skill" data-action="skill1" data-slot="S1"><span>S1</span><i class="touch-cd"></i></button>
+              <button class="touch-btn skill" data-action="skill2" data-slot="S2"><span>S2</span><i class="touch-cd"></i></button>
+              <button class="touch-btn skill" data-action="skill3" data-slot="S3"><span>S3</span><i class="touch-cd"></i></button>
+              <button class="touch-btn ult" data-action="ult" data-slot="ULT"><span>ULT</span><i class="touch-cd"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- RESULT                                                             -->
+      <!-- ================================================================== -->
+      <section class="screen" id="screen-result" data-screen="result">
+        <div class="result-layout">
+          <div class="result-head">
+            <span class="eyebrow-small" id="result-kicker">MATCH COMPLETE</span>
+            <h1 id="result-title">YOU WIN</h1>
+            <p id="result-reason">K.O.</p>
+          </div>
+          <div class="result-score" id="result-score">2 — 0</div>
+          <div class="result-players" id="result-players"></div>
+          <div class="result-actions">
+            <button class="btn primary wide" id="btn-rematch">Rematch</button>
+            <div class="button-row">
+              <button class="btn secondary" id="btn-result-hero">Change Fighter</button>
+              <button class="btn ghost" id="btn-back-lobby">Back to Lobby</button>
+              <button class="btn ghost" id="btn-find-new">Find New Opponent</button>
+            </div>
+          </div>
+          <p class="rematch-status" id="result-rematch-status"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODALS                                                               -->
+  <!-- ==================================================================== -->
+  <div class="modal-backdrop hidden" id="nickname-modal">
+    <div class="modal-card nickname-card">
+      <span class="eyebrow"><span></span> FIRST VISIT <span></span></span>
+      <h2>Enter the arena</h2>
+      <p class="modal-copy">Pick a nickname. A guest player ID is saved on this device so you can reconnect mid-fight.</p>
+      <form id="nickname-form" autocomplete="off">
+        <label class="field-label" for="nickname-input">Nickname</label>
+        <input class="text-input" id="nickname-input" maxlength="12" minlength="1" placeholder="FIGHTER" autocomplete="nickname" required />
+        <div class="input-hint"><span id="nickname-hint">1–12 characters</span><span id="nickname-count">0 / 12</span></div>
+        <button class="btn primary wide" id="nickname-submit" type="submit">Enter the arena</button>
+      </form>
+      <p class="fine-print">No account. No download. Skill and luck only.</p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="join-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="join-close" aria-label="Close">×</button>
+      <span class="eyebrow"><span></span> PRIVATE ROOM <span></span></span>
+      <h2>Join by code</h2>
+      <p class="modal-copy">Enter the 4-letter code from your friend. Codes are not case sensitive.</p>
+      <form id="join-form" autocomplete="off">
+        <input class="text-input code-input" id="join-code" maxlength="6" placeholder="ABCD" autocomplete="off" required />
+        <button class="btn primary wide" type="submit">Join Room</button>
+      </form>
+      <button class="btn ghost wide" id="join-spectate">Spectate instead</button>
+      <p class="fine-print">Invite links open automatically after you choose a nickname.</p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="match-found-backdrop">
+    <div class="modal-card match-found-card">
+      <span class="eyebrow"><span></span> MATCH FOUND <span></span></span>
+      <div class="versus-line">
+        <div class="mf-you">
+          <span class="label">YOU</span>
+          <strong id="mf-you-name">Fighter</strong>
+        </div>
+        <div class="vs-mark">VS</div>
+        <div class="mf-opponent">
+          <span class="label">OPPONENT</span>
+          <strong id="mf-opponent">Opponent</strong>
+          <small id="mf-opponent-rating">1000 ELO</small>
+        </div>
+      </div>
+      <div class="accept-timer">
+        <svg viewBox="0 0 100 100" class="accept-ring">
+          <circle cx="50" cy="50" r="44" class="track"></circle>
+          <circle cx="50" cy="50" r="44" class="progress" id="mf-ring"></circle>
+        </svg>
+        <div class="accept-seconds" id="mf-countdown">5</div>
+      </div>
+      <p class="mf-status" id="mf-status">Both fighters must accept.</p>
+      <div class="button-row">
+        <button class="btn primary" id="mf-accept">Accept</button>
+        <button class="btn ghost" id="mf-decline">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="confirm-modal">
+    <div class="modal-card compact">
+      <h2 id="confirm-title">Are you sure?</h2>
+      <p class="modal-copy" id="confirm-copy">This action cannot be undone.</p>
+      <div class="button-row">
+        <button class="btn primary" id="confirm-yes">Confirm</button>
+        <button class="btn ghost" id="confirm-no">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="connection-overlay hidden" id="connection-overlay">
+    <div class="spinner"></div>
+    <strong id="connection-title">Reconnecting…</strong>
+    <span id="connection-copy">Trying to restore your session.</span>
+  </div>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
