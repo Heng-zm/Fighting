@@ -40,7 +40,34 @@ Replaced the fixed joystick with a **floating joystick**, the standard for mobil
 - **Robustness**: single-pointer tracking (second finger ignored), pointer capture so drags leaving the zone still track, release/blur fully clears inputs (no stuck movement), and the touch-scale/opacity settings still apply.
 - Verified via scripted touch drag: recentering, `dir-*` classes, `input.left/right/up` truthiness, 44px travel clamp, and clean release — plus all unit/integration/mobile E2E suites.
 
-## Screen-by-Screen UX Audit & Action Items
+## Visual Verification Gallery (Captured via Playwright)
+
+### 1. Desktop Main Menu (`docs/QA/screenshots/desktop-main-menu.png`)
+- **Before**: Static placeholder elements without arcade styling or quick accessibility access.
+- **After**: High-contrast arcade banner with real-time stats (fighters online, searching now, heroes ready), fighter card preview with fallback initials, and gear settings button in the top navigation bar.
+
+### 2. Character Select Screen (`docs/QA/screenshots/character-select.png`)
+- **Before**: Unstyled listing with ambiguous selection feedback.
+- **After**: Rich hero selection cards showcasing archetype attributes, full stat distribution (Speed, Jump, Health, Weight), and interactive skill preview tiles with power requirements and slot tags.
+
+### 3. Room Lobby (`docs/QA/screenshots/lobby-view.png`)
+- **Before**: Raw text inputs and ambiguous ready states.
+- **After**: Dedicated P1 / P2 slot cards showing selected fighter portraits, clean ready indicator badges, 4-letter room code with one-click copy toast feedback, and quick emote strip.
+
+### 4. Settings & Accessibility Modal (`docs/QA/screenshots/settings-modal.png`)
+- **Before**: No user settings existed; volume and motion preferences could not be tuned.
+- **After**: Comprehensive modal offering Sound FX volume slider, Reduce Motion toggle (disabling canvas camera shake and screen hit-flashes), Colorblind Health Bar mode (blue vs amber hues), and Mobile Touch Scale & Opacity sliders.
+
+### 5. Mobile Landscape Main Menu (`docs/QA/screenshots/mobile-landscape-menu.png`)
+- **Before**: Unoptimized viewport scaling with overlapping navigation pills.
+- **After**: Fully responsive landscape layout matching iPhone 14 (844x390) and Pixel 7 (640x360) standards with full touch target compliance (all buttons $\ge 44\times 44\text{px}$).
+
+### 6. Mobile In-Game Combat HUD & Floating Joystick (`docs/QA/screenshots/mobile-combat-hud.png`)
+- **Before**: Fixed bottom-left joystick ring that covered combat action; emote bar overlapped S2/ULT buttons.
+- **After**:
+  - Dynamic floating joystick zone across the lower-left thumb area, spawning centered wherever the thumb touches, with 4 cardinal direction arrow lights.
+  - Right-hand ergonomic touch cluster with minimum 44px targets, numeric cooldown overlays, and unaffordable skill dimming.
+  - Danger vignette glow during low health ($\le 25\%$ HP), centered timer, mirrored opponent power gauge, and connection quality indicator.
 
 ### 1. Main Menu & Nickname Prompt
 - Current: Minimalist placeholder.
