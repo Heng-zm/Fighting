@@ -740,3 +740,5 @@ links shared with another machine.
   it with your own PNG sheets without changing code.
 - The game is tuned for two fighters per room and one room per player. Spectators
   are read-only and do not count toward the two player slots.
+#   F i g h t i n g  
+ 
