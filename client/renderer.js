@@ -563,6 +563,7 @@ export class Renderer {
     this.shake = 0;
     this.shakeX = 0;
     this.shakeY = 0;
+    this.reduceMotion = false;
     this.flash = { color: '#ffffff', alpha: 0 };
     this.vignettePulse = 0;
 
@@ -1753,11 +1754,13 @@ export class Renderer {
     this.emotes = this.emotes.filter((emote) => emote.life > 0);
 
     this.shake *= Math.pow(0.0008, dt);
+    if (this.reduceMotion) this.shake = 0;
     if (this.shake < 0.2) this.shake = 0;
     this.shakeX = (Math.random() - 0.5) * this.shake * 2;
     this.shakeY = (Math.random() - 0.5) * this.shake * 2;
 
     this.flash.alpha *= Math.pow(0.002, dt);
+    if (this.reduceMotion) this.flash.alpha = 0;
     if (this.flash.alpha < 0.005) this.flash.alpha = 0;
 
     for (const mote of this.ambient) {
@@ -2453,10 +2456,13 @@ export class Renderer {
       const pop = floater.life > floater.maxLife - 0.1 ? 1 + (floater.maxLife - floater.life) * 2 : 1;
       ctx.font = `900 ${Math.round(floater.size * pop)}px ${floater.label ? UI_FONT : DISPLAY_FONT}`;
       ctx.lineWidth = floater.label ? 3 : 4;
+      const half = ctx.measureText(floater.text).width / 2 + 6;
+      const x = clamp(floater.x, half, ARENA.width - half);
+      const y = clamp(floater.y, 48, ARENA.height - 28);
       ctx.strokeStyle = `rgba(0, 0, 0, ${alpha * 0.7})`;
-      ctx.strokeText(floater.text, floater.x, floater.y);
+      ctx.strokeText(floater.text, x, y);
       ctx.fillStyle = rgba(floater.color, alpha);
-      ctx.fillText(floater.text, floater.x, floater.y);
+      ctx.fillText(floater.text, x, y);
     }
     ctx.restore();
   }

@@ -136,6 +136,7 @@ class SoundEngine {
     this.ctx = null;
     this.master = null;
     this.muted = storageGet(localStorage, MUTED_KEY) === '1';
+    this.volume = 0.7;
     this.lastPing = 0;
   }
 
@@ -150,13 +151,24 @@ class SoundEngine {
     try {
       this.ctx = new AudioCtor();
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.55;
+      this.master.gain.value = this.volume;
       this.master.connect(this.ctx.destination);
     } catch (error) {
       this.ctx = null;
       this.master = null;
     }
     return this.ctx;
+  }
+
+  setVolume(volume) {
+    const next = Math.max(0, Math.min(1, Number(volume) || 0));
+    this.volume = next;
+    if (!this.master || !this.ctx) return;
+    try {
+      this.master.gain.setTargetAtTime(this.muted ? 0 : next, this.ctx.currentTime, 0.02);
+    } catch (error) {
+      // Ignore audio graph errors.
+    }
   }
 
   unlock() {
@@ -177,7 +189,7 @@ class SoundEngine {
       this.unlock();
       if (this.master) {
         try {
-          this.master.gain.setTargetAtTime(0.55, this.ctx.currentTime, 0.02);
+          this.master.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.02);
         } catch (error) {
           // Ignore.
         }

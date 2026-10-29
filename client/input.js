@@ -121,7 +121,8 @@ export class InputController {
     this.touchHeld.clear();
     this.latches = {};
     this.joyVector = { x: 0, y: 0 };
-    this.resetJoystickVisual();
+    this.joystickPointer = null;
+    this.resetJoystick();
   }
 
   onKeyDown(event) {
@@ -182,60 +183,81 @@ export class InputController {
   }
 
   bindJoystick() {
+    const zone = document.getElementById('joystick-zone');
     const joystick = document.getElementById('joystick');
     const knob = document.getElementById('joystick-knob');
-    if (!joystick || !knob) return;
+    if (!zone || !joystick || !knob) return;
 
-    const update = (event) => {
-      const rect = joystick.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const radius = rect.width * 0.38;
-      let dx = event.clientX - centerX;
-      let dy = event.clientY - centerY;
-      const distance = Math.hypot(dx, dy);
-      if (distance > radius) {
-        dx = (dx / distance) * radius;
-        dy = (dy / distance) * radius;
-      }
-      knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-      this.joyVector = { x: dx / radius, y: dy / radius };
+    const TRAVEL = 44;
+    this.joyOrigin = { x: 0, y: 0 };
+
+    const placeAt = (event) => {
+      const rect = zone.getBoundingClientRect();
+      const half = (joystick.offsetWidth || 124) / 2 + 2;
+      this.joyOrigin.x = Math.max(half, Math.min(rect.width - half, event.clientX - rect.left));
+      this.joyOrigin.y = Math.max(half, Math.min(rect.height - half, event.clientY - rect.top));
+      joystick.style.left = `${this.joyOrigin.x}px`;
+      joystick.style.top = `${this.joyOrigin.y}px`;
     };
 
-    const move = (event) => {
-      if (this.joystickPointer !== event.pointerId) return;
-      event.preventDefault();
-      update(event);
+    const update = (event) => {
+      const rect = zone.getBoundingClientRect();
+      let dx = event.clientX - rect.left - this.joyOrigin.x;
+      let dy = event.clientY - rect.top - this.joyOrigin.y;
+      const distance = Math.hypot(dx, dy);
+      if (distance > TRAVEL) {
+        dx = (dx / distance) * TRAVEL;
+        dy = (dy / distance) * TRAVEL;
+      }
+      knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      this.joyVector = { x: dx / TRAVEL, y: dy / TRAVEL };
+      joystick.classList.toggle('dir-left', this.joyVector.x < -0.32);
+      joystick.classList.toggle('dir-right', this.joyVector.x > 0.32);
+      joystick.classList.toggle('dir-up', this.joyVector.y < -0.5);
+      joystick.classList.toggle('dir-down', this.joyVector.y > 0.5);
     };
 
     const release = (event) => {
       if (this.joystickPointer !== event.pointerId) return;
-      event.preventDefault();
+      if (event.cancelable) event.preventDefault();
       this.joystickPointer = null;
       this.joyVector = { x: 0, y: 0 };
-      this.resetJoystickVisual();
+      this.resetJoystick();
     };
 
-    joystick.addEventListener('pointerdown', (event) => {
+    zone.addEventListener('pointerdown', (event) => {
       if (!this.enabled) return;
+      if (this.joystickPointer !== null) return;
       event.preventDefault();
       this.joystickPointer = event.pointerId;
       try {
-        joystick.setPointerCapture(event.pointerId);
+        zone.setPointerCapture(event.pointerId);
       } catch (error) {
         // Ignore unsupported capture.
       }
+      joystick.classList.add('active');
+      placeAt(event);
       update(event);
     });
-    joystick.addEventListener('pointermove', move);
-    joystick.addEventListener('pointerup', release);
-    joystick.addEventListener('pointercancel', release);
-    joystick.addEventListener('lostpointercapture', release);
-    joystick.addEventListener('contextmenu', (event) => event.preventDefault());
+    zone.addEventListener('pointermove', (event) => {
+      if (this.joystickPointer !== event.pointerId) return;
+      event.preventDefault();
+      update(event);
+    });
+    zone.addEventListener('pointerup', release);
+    zone.addEventListener('pointercancel', release);
+    zone.addEventListener('lostpointercapture', release);
+    zone.addEventListener('contextmenu', (event) => event.preventDefault());
   }
 
-  resetJoystickVisual() {
+  resetJoystick() {
+    const joystick = document.getElementById('joystick');
     const knob = document.getElementById('joystick-knob');
+    if (joystick) {
+      joystick.classList.remove('active', 'dir-left', 'dir-right', 'dir-up', 'dir-down');
+      joystick.style.left = '';
+      joystick.style.top = '';
+    }
     if (knob) knob.style.transform = 'translate(-50%, -50%)';
   }
 
