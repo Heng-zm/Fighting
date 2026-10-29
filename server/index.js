@@ -118,9 +118,10 @@ function currentRoomFor(player) {
 }
 
 function withErrors(socket, handler) {
-  return (...args) => {
+  return (payload, ...args) => {
     try {
-      handler(...args);
+      const safePayload = payload && typeof payload === 'object' ? payload : {};
+      handler(safePayload, ...args);
     } catch (error) {
       if (error instanceof RoomError) {
         sendError(socket, error.code, error.message);
@@ -302,6 +303,7 @@ io.on('connection', (socket) => {
   }));
 
   socket.on('input', (payload = {}) => {
+    if (!payload || typeof payload !== 'object') return;
     const player = getPlayer(socket);
     if (!player) return;
     const room = rooms.roomForPlayer(player.playerId);
