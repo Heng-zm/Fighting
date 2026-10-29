@@ -27,6 +27,8 @@ export class HUD {
       remoteChip: document.getElementById('hud-remote-health-chip'),
       localPower: document.getElementById('hud-local-power'),
       remotePower: document.getElementById('hud-remote-power'),
+      localPowerWrap: document.getElementById('hud-local-power-wrap'),
+      remotePowerWrap: document.getElementById('hud-remote-power-wrap'),
       localPowerText: document.getElementById('hud-local-power-text'),
       remotePowerText: document.getElementById('hud-remote-power-text'),
       localPips: document.getElementById('hud-local-pips'),
@@ -38,6 +40,7 @@ export class HUD {
       ping: document.getElementById('hud-ping'),
       comboLocal: document.getElementById('hud-combo-local'),
       comboRemote: document.getElementById('hud-combo-remote'),
+      danger: document.getElementById('danger-vignette'),
       announce: document.getElementById('hud-announce'),
       announceMain: document.getElementById('announce-main'),
       announceSub: document.getElementById('announce-sub'),
@@ -66,6 +69,7 @@ export class HUD {
     this.disconnectTimer = null;
     this.disconnectUntil = 0;
     this.disconnectState = false;
+    this.lastCombo = { local: 0, remote: 0 };
   }
 
   setMatch(payload, localId, spectator = false) {
@@ -84,6 +88,8 @@ export class HUD {
     this.hideDisconnect();
     this.hideCombo('local');
     this.hideCombo('remote');
+    this.lastCombo = { local: 0, remote: 0 };
+    this.els.danger?.classList.remove('active');
 
     const players = payload.players || [];
     let local = null;
@@ -137,6 +143,8 @@ export class HUD {
       root.title = skill
         ? `${skill.displayName} — ${skill.cooldown}s cooldown${skill.powerCost ? `, ${skill.powerCost} power` : ''}`
         : `No ${slot} skill`;
+      root.setAttribute('role', 'group');
+      root.setAttribute('aria-label', skill ? `${skill.displayName} (${SLOT_KEYS[slot] || slot})` : `No ${slot} skill`);
 
       const art = document.createElement('div');
       art.className = 'skill-art';
@@ -172,17 +180,36 @@ export class HUD {
       power.textContent = slot === 'ULT' ? '100 PWR' : skill?.powerCost ? `${skill.powerCost} PWR` : 'FREE';
 
       root.append(art, key, power);
+      root.addEventListener('click', () => {
+        const remaining = this.lastCooldowns?.[slot] || 0;
+        const cost = slot === 'ULT' ? 100 : (skill?.powerCost || 0);
+        if (remaining <= 0 && (this.lastLocalPower || 0) < cost) {
+          this.triggerNotEnoughPower(slot);
+        }
+      });
       this.els.skillBar.appendChild(root);
       this.skillEls.push({ slot, skill, root, shade, text });
     }
 
     // Touch buttons mirror availability and cooldown readouts.
+    this.currentHero = hero;
     document.querySelectorAll('.touch-btn[data-slot]').forEach((button) => {
       const slot = button.dataset.slot;
       const skill = (hero.skills || []).find((entry) => entry.slot === slot);
       button.classList.toggle('noskill', !skill);
+      button.setAttribute('aria-label', skill ? skill.displayName : `No ${slot} skill`);
       const cd = button.querySelector('.touch-cd');
       if (cd) cd.textContent = '';
+      if (button.dataset.powerBound === '1') return;
+      button.dataset.powerBound = '1';
+      button.addEventListener('pointerdown', () => {
+        const activeSkill = (this.currentHero?.skills || []).find((entry) => entry.slot === slot);
+        const remaining = this.lastCooldowns?.[slot] || 0;
+        const cost = slot === 'ULT' ? 100 : (activeSkill?.powerCost || 0);
+        if (remaining <= 0 && (this.lastLocalPower || 0) < cost) {
+          this.triggerNotEnoughPower(slot);
+        }
+      });
     });
   }
 
@@ -191,8 +218,8 @@ export class HUD {
     const local = snapshot.players.find((player) => player.id === this.localHudId);
     const remote = snapshot.players.find((player) => player.id === this.remoteHudId);
 
-    if (local) this.updateHealth('local', local);
-    if (remote) this.updateHealth('remote', remote);
+    if (local) this.updateHealth('local', local, snapshot.phase);
+    if (remote) this.updateHealth('remote', remote, snapshot.phase);
     if (local) this.updatePower('local', local);
     if (remote) this.updatePower('remote', remote);
     if (local) this.renderPips(this.els.localPips, local.wins || 0);
@@ -212,7 +239,9 @@ export class HUD {
       const ms = Math.max(0, Math.round(latency || 0));
       this.els.ping.textContent = `PING ${ms}ms`;
       this.els.ping.classList.remove('good', 'mid', 'bad');
-      this.els.ping.classList.add(ms < 90 ? 'good' : ms < 170 ? 'mid' : 'bad');
+      const quality = ms < 60 ? 'good' : ms < 150 ? 'mid' : 'bad';
+      this.els.ping.classList.add(quality);
+      this.els.ping.title = ms < 60 ? 'Excellent connection' : ms < 150 ? 'Playable connection' : 'High latency — expect delay';
     }
 
     this.updateCooldowns(local, snapshot);
@@ -225,13 +254,16 @@ export class HUD {
     }
   }
 
-  updateHealth(side, player) {
+  updateHealth(side, player, phase = '') {
     const pct = Math.max(0, Math.min(100, (player.health / Math.max(1, player.maxHealth)) * 100));
     const fill = side === 'local' ? this.els.localHealth : this.els.remoteHealth;
     const chip = side === 'local' ? this.els.localChip : this.els.remoteChip;
     if (!fill) return;
     fill.style.width = `${pct}%`;
     fill.classList.toggle('low', pct <= 25);
+    if (side === 'local') {
+      this.els.danger?.classList.toggle('active', !this.spectator && phase === 'playing' && pct <= 25);
+    }
     if (!chip) return;
 
     const previous = this.healthShown[side];
@@ -256,8 +288,10 @@ export class HUD {
     const power = Math.max(0, Math.min(100, player.power || 0));
     const fill = side === 'local' ? this.els.localPower : this.els.remotePower;
     const text = side === 'local' ? this.els.localPowerText : this.els.remotePowerText;
+    const wrap = side === 'local' ? this.els.localPowerWrap : this.els.remotePowerWrap;
     if (fill) fill.style.width = `${power}%`;
     if (text) text.textContent = String(Math.round(power));
+    wrap?.classList.toggle('full', power >= 100);
   }
 
   renderPips(container, wins) {
@@ -291,6 +325,8 @@ export class HUD {
 
   updateCooldowns(local, snapshot) {
     if (!local) return;
+    this.lastLocalPower = local.power || 0;
+    this.lastCooldowns = local.cooldowns || {};
     for (const entry of this.skillEls) {
       if (!entry.skill) continue;
       const remaining = local.cooldowns?.[entry.slot] || 0;
@@ -304,26 +340,69 @@ export class HUD {
       const ready = remaining <= 0 && hasPower;
       entry.root.classList.toggle('ready', ready && entry.slot !== 'ULT');
       entry.root.classList.toggle('ult-ready', ready && entry.slot === 'ULT');
+      entry.root.classList.toggle('unpowered', remaining <= 0 && !hasPower);
 
       const touch = document.querySelector(`.touch-btn[data-slot="${entry.slot}"]`);
       const cd = touch?.querySelector('.touch-cd');
       if (cd) cd.textContent = remaining > 0 ? String(Math.ceil(remaining / 60)) : '';
       touch?.classList.toggle('ready', ready);
+      touch?.classList.toggle('unpowered', remaining <= 0 && !hasPower);
     }
     if (this.els.skillBar) this.els.skillBar.classList.toggle('hidden', this.spectator);
+  }
+
+  triggerNotEnoughPower(slot) {
+    const entry = this.skillEls.find((s) => s.slot === slot);
+    if (entry?.root) {
+      entry.root.classList.remove('power-shake');
+      void entry.root.offsetWidth;
+      entry.root.classList.add('power-shake');
+      setTimeout(() => entry.root.classList.remove('power-shake'), 400);
+    }
+    const touch = document.querySelector(`.touch-btn[data-slot="${slot}"]`);
+    if (touch) {
+      touch.classList.remove('power-shake');
+      void touch.offsetWidth;
+      touch.classList.add('power-shake');
+      setTimeout(() => touch.classList.remove('power-shake'), 400);
+    }
+    const localPowerWrap = document.querySelector('#hud-local .power-wrap');
+    if (localPowerWrap) {
+      localPowerWrap.classList.remove('power-shake');
+      void localPowerWrap.offsetWidth;
+      localPowerWrap.classList.add('power-shake');
+      setTimeout(() => localPowerWrap.classList.remove('power-shake'), 400);
+    }
+    // Haptic feedback vibration where supported
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      try {
+        navigator.vibrate([30, 40, 30]);
+      } catch (e) {}
+    }
   }
 
   updateCombos(local, remote, snapshot) {
     const showLocal = !!local && local.combo >= 2 && snapshot.phase === 'playing';
     const showRemote = !!remote && remote.combo >= 2 && snapshot.phase === 'playing';
-    if (this.els.comboLocal) {
-      this.els.comboLocal.classList.toggle('hidden', !showLocal);
-      if (showLocal) this.els.comboLocal.textContent = `×${local.combo} COMBO`;
+    this.renderCombo('local', showLocal ? local.combo : 0, showLocal);
+    this.renderCombo('remote', showRemote ? remote.combo : 0, showRemote);
+  }
+
+  renderCombo(side, combo, show) {
+    const el = side === 'local' ? this.els.comboLocal : this.els.comboRemote;
+    if (!el) return;
+    el.classList.toggle('hidden', !show);
+    if (!show) {
+      this.lastCombo[side] = 0;
+      return;
     }
-    if (this.els.comboRemote) {
-      this.els.comboRemote.classList.toggle('hidden', !showRemote);
-      if (showRemote) this.els.comboRemote.textContent = `×${remote.combo} COMBO`;
+    el.textContent = `×${combo} COMBO`;
+    if (combo > this.lastCombo[side]) {
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
     }
+    this.lastCombo[side] = combo;
   }
 
   hideCombo(side) {

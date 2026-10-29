@@ -29,6 +29,7 @@
           </span>
         </button>
         <button class="icon-btn" id="btn-audio" title="Toggle sound" aria-label="Toggle sound">♪</button>
+        <button class="icon-btn" id="btn-settings" title="Settings & Accessibility" aria-label="Settings">⚙</button>
       </div>
     </header>
 
@@ -213,6 +214,7 @@
           <canvas id="game-canvas" width="2560" height="1440" aria-label="Fighting arena"></canvas>
 
           <div class="hud" id="hud">
+            <div class="danger-vignette" id="danger-vignette" aria-hidden="true"></div>
             <div class="hud-top">
               <div class="fighter-hud left" id="hud-local">
                 <div class="hud-name-row">
@@ -224,7 +226,7 @@
                   <div class="health-fill" id="hud-local-health"></div>
                   <div class="health-gloss"></div>
                 </div>
-                <div class="power-wrap">
+                <div class="power-wrap" id="hud-local-power-wrap">
                   <div class="power-fill" id="hud-local-power"></div>
                   <span id="hud-local-power-text">0</span>
                 </div>
@@ -250,7 +252,7 @@
                   <div class="health-fill" id="hud-remote-health"></div>
                   <div class="health-gloss"></div>
                 </div>
-                <div class="power-wrap">
+                <div class="power-wrap" id="hud-remote-power-wrap">
                   <div class="power-fill" id="hud-remote-power"></div>
                   <span id="hud-remote-power-text">0</span>
                 </div>
@@ -264,7 +266,7 @@
             <div class="combo-badge hidden" id="hud-combo-local"></div>
             <div class="combo-badge remote hidden" id="hud-combo-remote"></div>
 
-            <div class="announce" id="hud-announce">
+            <div class="announce" id="hud-announce" role="status" aria-live="polite">
               <div class="announce-main" id="announce-main"></div>
               <div class="announce-sub" id="announce-sub"></div>
             </div>
@@ -287,11 +289,6 @@
           </div>
 
           <div class="touch-controls" id="touch-controls">
-            <div class="joystick" id="joystick" aria-label="Virtual joystick">
-              <div class="joystick-ring"></div>
-              <div class="joystick-knob" id="joystick-knob"></div>
-              <span class="joystick-label">MOVE</span>
-            </div>
             <div class="touch-buttons">
               <button class="touch-btn jump" data-action="jump"><span>JUMP</span><i class="touch-cd"></i></button>
               <button class="touch-btn block" data-action="block"><span>BLOCK</span><i class="touch-cd"></i></button>
@@ -301,6 +298,18 @@
               <button class="touch-btn skill" data-action="skill2" data-slot="S2"><span>S2</span><i class="touch-cd"></i></button>
               <button class="touch-btn skill" data-action="skill3" data-slot="S3"><span>S3</span><i class="touch-cd"></i></button>
               <button class="touch-btn ult" data-action="ult" data-slot="ULT"><span>ULT</span><i class="touch-cd"></i></button>
+            </div>
+          </div>
+
+          <div class="joystick-zone" id="joystick-zone" aria-hidden="true">
+            <div class="joystick" id="joystick" aria-label="Virtual joystick">
+              <div class="joystick-ring"></div>
+              <span class="joy-dir up"></span>
+              <span class="joy-dir right"></span>
+              <span class="joy-dir down"></span>
+              <span class="joy-dir left"></span>
+              <div class="joystick-knob" id="joystick-knob"></div>
+              <span class="joystick-label">MOVE</span>
             </div>
           </div>
         </div>
@@ -406,15 +415,103 @@
     </div>
   </div>
 
+  <div class="modal-backdrop hidden" id="settings-modal">
+    <div class="modal-card settings-card">
+      <button class="modal-close" id="settings-close" aria-label="Close settings">×</button>
+      <span class="eyebrow"><span></span> SYSTEM & ACCESSIBILITY <span></span></span>
+      <h2>Game Settings</h2>
+      
+      <div class="settings-group">
+        <h3>Audio</h3>
+        <div class="setting-row">
+          <label for="setting-sound-volume">Sound FX Volume</label>
+          <div class="slider-val-wrap">
+            <input type="range" id="setting-sound-volume" min="0" max="100" value="70" />
+            <span class="val-badge" id="setting-sound-val">70%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>Accessibility & Visuals</h3>
+        <div class="setting-row toggle-row">
+          <label for="setting-reduce-motion">Reduce Motion & Screen Shake
+            <small>Disables camera trauma shake and flashes</small>
+          </label>
+          <input type="checkbox" id="setting-reduce-motion" />
+        </div>
+        <div class="setting-row toggle-row">
+          <label for="setting-colorblind">High-Contrast HP Bars
+            <small>Colorblind-safe cyan/orange health indicators</small>
+          </label>
+          <input type="checkbox" id="setting-colorblind" />
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>Touch & Mobile Controls</h3>
+        <div class="setting-row">
+          <label for="setting-touch-scale">Touch Button Scale</label>
+          <div class="slider-val-wrap">
+            <input type="range" id="setting-touch-scale" min="80" max="140" value="100" />
+            <span class="val-badge" id="setting-touch-scale-val">100%</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label for="setting-touch-opacity">Touch Button Opacity</label>
+          <div class="slider-val-wrap">
+            <input type="range" id="setting-touch-opacity" min="30" max="100" value="85" />
+            <span class="val-badge" id="setting-touch-opacity-val">85%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>Keyboard & Gamepad Controls</h3>
+        <div class="keybinds-table">
+          <div><span>Move / Jump / Crouch</span><strong>WASD / Arrow Keys</strong></div>
+          <div><span>Light Attack</span><strong>J</strong></div>
+          <div><span>Heavy Attack</span><strong>K</strong></div>
+          <div><span>Block</span><strong>L / Shift</strong></div>
+          <div><span>Skills 1, 2, 3</span><strong>U / I / O</strong></div>
+          <div><span>Ultimate</span><strong>P</strong></div>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button class="btn primary wide" onclick="document.getElementById('settings-modal').classList.add('hidden')">Done</button>
+      </div>
+    </div>
+  </div>
+
   <div class="connection-overlay hidden" id="connection-overlay">
     <div class="spinner"></div>
     <strong id="connection-title">Reconnecting…</strong>
     <span id="connection-copy">Trying to restore your session.</span>
   </div>
 
+  <div class="orientation-hint" id="orientation-hint">
+    <div class="orientation-icon">📱 ↷</div>
+    <strong>Rotate to Landscape</strong>
+    <span>Play in landscape mode for arcade controls</span>
+  </div>
+
   <div class="toast-container" id="toasts"></div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="/main.js"></script>
+  <script type="module">
+    import { SettingsUI } from '/ui/settings.js';
+    window.settingsUI = new SettingsUI({
+      onVolumeChange: (vol) => {
+        window.shadowClash?.audio?.setVolume?.(vol);
+      },
+      onReduceMotionChange: (reduced) => {
+        if (window.shadowClash?.renderer) {
+          window.shadowClash.renderer.reduceMotion = reduced;
+        }
+      }
+    });
+  </script>
 </body>
 </html>

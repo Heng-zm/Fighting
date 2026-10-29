@@ -6,3 +6,6 @@ characters/*/sprites/*.png
 characters/*/icons/*.png
 !characters/flame/sprites/.gitkeep
 !characters/shade/sprites/.gitkeep
+test-results/
+.qoder/
+
