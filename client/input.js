@@ -193,7 +193,7 @@ export class InputController {
 
     const placeAt = (event) => {
       const rect = zone.getBoundingClientRect();
-      const half = (joystick.offsetWidth || 124) / 2 + 2;
+      const half = (joystick.offsetWidth || 136) / 2 + 4;
       this.joyOrigin.x = Math.max(half, Math.min(rect.width - half, event.clientX - rect.left));
       this.joyOrigin.y = Math.max(half, Math.min(rect.height - half, event.clientY - rect.top));
       joystick.style.left = `${this.joyOrigin.x}px`;
@@ -211,10 +211,10 @@ export class InputController {
       }
       knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
       this.joyVector = { x: dx / TRAVEL, y: dy / TRAVEL };
-      joystick.classList.toggle('dir-left', this.joyVector.x < -0.32);
-      joystick.classList.toggle('dir-right', this.joyVector.x > 0.32);
-      joystick.classList.toggle('dir-up', this.joyVector.y < -0.5);
-      joystick.classList.toggle('dir-down', this.joyVector.y > 0.5);
+      joystick.classList.toggle('dir-left', this.joyVector.x < -0.3);
+      joystick.classList.toggle('dir-right', this.joyVector.x > 0.3);
+      joystick.classList.toggle('dir-up', this.joyVector.y < -0.38);
+      joystick.classList.toggle('dir-down', this.joyVector.y > 0.38);
     };
 
     const release = (event) => {
@@ -318,10 +318,10 @@ export class InputController {
     }
 
     const joy = this.joyVector;
-    const joyLeft = joy.x < -0.32;
-    const joyRight = joy.x > 0.32;
-    const joyUp = joy.y < -0.5;
-    const joyDown = joy.y > 0.5;
+    const joyLeft = joy.x < -0.3;
+    const joyRight = joy.x > 0.3;
+    const joyUp = joy.y < -0.38;
+    const joyDown = joy.y > 0.38;
     if (joyUp && !this.joyUpHeld) this.latch('up');
     this.joyUpHeld = joyUp;
 

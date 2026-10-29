@@ -29,6 +29,7 @@
           </span>
         </button>
         <button class="icon-btn" id="btn-audio" title="Toggle sound" aria-label="Toggle sound">♪</button>
+        <button class="icon-btn" id="btn-fullscreen" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">⛶</button>
         <button class="icon-btn" id="btn-settings" title="Settings & Accessibility" aria-label="Settings">⚙</button>
       </div>
     </header>
@@ -285,7 +286,10 @@
             </div>
             <div class="disconnect-banner spectator hidden" id="spectator-banner">SPECTATING</div>
 
-            <button class="forfeit-btn" id="btn-forfeit" title="Leave match">⚑ Leave</button>
+            <div class="hud-action-row">
+              <button class="hud-btn hud-fullscreen-btn" id="btn-fullscreen-hud" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">⛶</button>
+              <button class="forfeit-btn" id="btn-forfeit" title="Leave match">⚑ Leave</button>
+            </div>
           </div>
 
           <div class="touch-controls" id="touch-controls">
@@ -304,11 +308,13 @@
           <div class="joystick-zone" id="joystick-zone" aria-hidden="true">
             <div class="joystick" id="joystick" aria-label="Virtual joystick">
               <div class="joystick-ring"></div>
-              <span class="joy-dir up"></span>
-              <span class="joy-dir right"></span>
-              <span class="joy-dir down"></span>
-              <span class="joy-dir left"></span>
-              <div class="joystick-knob" id="joystick-knob"></div>
+              <span class="joy-dir up">▲</span>
+              <span class="joy-dir right">▶</span>
+              <span class="joy-dir down">▼</span>
+              <span class="joy-dir left">◀</span>
+              <div class="joystick-knob" id="joystick-knob">
+                <div class="knob-cap"></div>
+              </div>
               <span class="joystick-label">MOVE</span>
             </div>
           </div>
@@ -429,6 +435,16 @@
             <input type="range" id="setting-sound-volume" min="0" max="100" value="70" />
             <span class="val-badge" id="setting-sound-val">70%</span>
           </div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>Display & Screen</h3>
+        <div class="setting-row">
+          <label for="btn-settings-fullscreen">Full Screen Mode
+            <small>Expand gameplay across your entire display</small>
+          </label>
+          <button class="btn secondary sm" id="btn-settings-fullscreen">Toggle Fullscreen</button>
         </div>
       </div>
 

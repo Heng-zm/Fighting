@@ -559,6 +559,11 @@ class ShadowClashApp {
 
     // Game controls ---------------------------------------------------------
     $('btn-forfeit')?.addEventListener('click', () => this.requestLeave());
+    $('btn-fullscreen')?.addEventListener('click', () => this.toggleFullscreen());
+    $('btn-fullscreen-hud')?.addEventListener('click', () => this.toggleFullscreen());
+    $('btn-settings-fullscreen')?.addEventListener('click', () => this.toggleFullscreen());
+    document.addEventListener('fullscreenchange', () => this.updateFullscreenUI());
+    document.addEventListener('webkitfullscreenchange', () => this.updateFullscreenUI());
     document.querySelectorAll('#game-emotes [data-emote]').forEach((button) => {
       button.addEventListener('click', () => this.sendEmote(button.dataset.emote));
     });
@@ -580,6 +585,47 @@ class ShadowClashApp {
         this.closeNickname();
       }
     });
+  }
+
+  toggleFullscreen() {
+    try {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const root = document.documentElement;
+        if (root.requestFullscreen) {
+          root.requestFullscreen().catch(() => {});
+        } else if (root.webkitRequestFullscreen) {
+          root.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    } catch (e) {
+      // Ignore unsupported fullscreen environments
+    }
+  }
+
+  updateFullscreenUI() {
+    const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle('is-fullscreen', isFull);
+    const label = isFull ? '🗗' : '⛶';
+    const topBtn = $('btn-fullscreen');
+    if (topBtn) {
+      topBtn.textContent = label;
+      topBtn.title = isFull ? 'Exit Fullscreen' : 'Enter Fullscreen';
+    }
+    const hudBtn = $('btn-fullscreen-hud');
+    if (hudBtn) {
+      hudBtn.textContent = label;
+      hudBtn.title = isFull ? 'Exit Fullscreen' : 'Enter Fullscreen';
+    }
+    const setBtn = $('btn-settings-fullscreen');
+    if (setBtn) {
+      setBtn.textContent = isFull ? 'Exit Fullscreen' : 'Enter Fullscreen';
+    }
   }
 
   // -----------------------------------------------------------------------

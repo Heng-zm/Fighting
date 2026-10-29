@@ -103,16 +103,44 @@ body.in-game {
   -webkit-user-select: none;
 }
 
+body.in-game {
+  overflow: hidden;
+  background: #03040b;
+}
+
 body.in-game .topbar {
-  display: none;
+  display: none !important;
 }
 
 body.in-game #screens {
+  height: 100vh;
+  height: 100dvh;
   min-height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 body.in-game #screen-game {
+  height: 100vh;
+  height: 100dvh;
   min-height: 100dvh;
+  max-height: 100dvh;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;
+}
+
+body.in-game .game-frame {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100vw !important;
+  max-height: 100dvh !important;
+  aspect-ratio: unset !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 ::selection {
@@ -1778,25 +1806,31 @@ main#screens {
 
 #screen-game {
   position: relative;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(6px, 1.5vh, 18px);
+  padding: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   min-height: 100dvh;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(52, 231, 255, 0.055), transparent 55%),
-    #03040b;
+  max-height: 100dvh;
+  overflow: hidden;
+  background: #03040b;
 }
 
 .game-frame {
   position: relative;
-  width: min(100%, calc((100dvh - 28px) * 16 / 9));
-  max-height: calc(100dvh - 28px);
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100dvh;
   overflow: hidden;
-  border: 1px solid rgba(140, 166, 255, 0.18);
-  border-radius: clamp(8px, 1vw, 16px);
-  background: #05060e;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 80px rgba(52, 231, 255, 0.04);
+  border: none;
+  border-radius: 0;
+  background: #03040b;
+  box-shadow: none;
 }
 
 #game-canvas {
@@ -1806,6 +1840,7 @@ main#screens {
   touch-action: none;
   image-rendering: auto;
   background: #03040a;
+  object-fit: contain;
 }
 
 .hud {
@@ -2380,18 +2415,49 @@ main#screens {
   letter-spacing: 0.25em;
 }
 
-.forfeit-btn {
+.hud-action-row {
   position: absolute;
   bottom: clamp(10px, 2vw, 24px);
-  left: clamp(10px, 1.8vw, 24px);
+  left: max(12px, calc(env(safe-area-inset-left) + 8px));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.hud-fullscreen-btn {
   padding: 4px 9px;
+  min-height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 5px;
+  background: rgba(5, 6, 15, 0.6);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: clamp(9px, 0.8vw, 13px);
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.15s ease;
+}
+
+.hud-fullscreen-btn:hover {
+  color: var(--cyan);
+  border-color: rgba(52, 231, 255, 0.5);
+  box-shadow: 0 0 10px rgba(52, 231, 255, 0.3);
+}
+
+.forfeit-btn {
+  padding: 4px 9px;
+  min-height: 28px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 5px;
   background: rgba(5, 6, 15, 0.52);
-  color: rgba(255, 255, 255, 0.45);
-  font-size: clamp(6px, 0.66vw, 9px);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: clamp(7px, 0.7vw, 10px);
   font-weight: 700;
+  cursor: pointer;
   pointer-events: auto;
+  transition: all 0.15s ease;
 }
 
 .forfeit-btn:hover {
@@ -2461,132 +2527,188 @@ main#screens {
 
 .joystick {
   position: absolute;
-  left: 92px;
-  top: calc(100% - 86px);
-  width: 124px;
-  height: 124px;
+  left: max(96px, calc(env(safe-area-inset-left) + 72px));
+  top: calc(100% - max(96px, calc(env(safe-area-inset-bottom) + 72px)));
+  width: 136px;
+  height: 136px;
   transform: translate(-50%, -50%) scale(var(--touch-scale, 1));
-  opacity: 0.4;
+  opacity: var(--touch-opacity, 0.85);
   touch-action: none;
+  pointer-events: none;
   transition:
-    left 0.3s cubic-bezier(0.2, 0.9, 0.3, 1),
-    top 0.3s cubic-bezier(0.2, 0.9, 0.3, 1),
+    left 0.28s cubic-bezier(0.18, 1.25, 0.35, 1),
+    top 0.28s cubic-bezier(0.18, 1.25, 0.35, 1),
     opacity 0.2s ease;
 }
 
 .joystick.active {
   opacity: 1;
-  transition: opacity 0.1s ease;
+  transition: opacity 0.1s ease !important;
 }
 
 .joystick-ring {
   position: absolute;
   inset: 0;
-  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.09), rgba(5, 6, 15, 0.32) 72%);
-  box-shadow: inset 0 0 26px rgba(0, 0, 0, 0.5), 0 6px 20px rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255, 185, 55, 0.75);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(26, 32, 60, 0.88) 0%, rgba(8, 10, 24, 0.95) 72%, rgba(4, 5, 12, 0.98) 100%);
+  box-shadow:
+    0 0 24px rgba(255, 170, 30, 0.35),
+    inset 0 0 26px rgba(0, 0, 0, 0.85),
+    inset 0 0 12px rgba(255, 185, 55, 0.2);
 }
 
 .joystick-ring::before {
   content: '';
   position: absolute;
-  inset: 9px;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
+  inset: 16px;
+  border: 1.5px dashed rgba(255, 209, 102, 0.4);
   border-radius: 50%;
 }
 
+.joystick-ring::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(255, 185, 55, 0.35);
+  box-shadow: 0 0 8px rgba(255, 185, 55, 0.6);
+}
+
 .joystick.active .joystick-ring {
-  border-color: rgba(255, 209, 102, 0.38);
+  border-color: rgba(255, 220, 120, 0.95);
+  box-shadow:
+    0 0 32px rgba(255, 185, 55, 0.55),
+    inset 0 0 26px rgba(0, 0, 0, 0.9),
+    inset 0 0 16px rgba(255, 209, 102, 0.35);
 }
 
 .joy-dir {
   position: absolute;
-  width: 0;
-  height: 0;
-  border: 5px solid transparent;
-  opacity: 0.28;
-  transition: opacity 0.12s ease, filter 0.12s ease;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  color: rgba(255, 215, 120, 0.65);
+  opacity: 0.65;
+  transition: opacity 0.12s ease, transform 0.12s ease, color 0.12s ease, text-shadow 0.12s ease;
+  user-select: none;
+  pointer-events: none;
 }
 
 .joy-dir.up {
-  top: 8px;
+  top: 5px;
   left: 50%;
-  border-top: 0;
-  border-bottom: 8px solid #fff;
   transform: translateX(-50%);
 }
 
 .joy-dir.down {
-  bottom: 8px;
+  bottom: 5px;
   left: 50%;
-  border-bottom: 0;
-  border-top: 8px solid #fff;
   transform: translateX(-50%);
 }
 
 .joy-dir.left {
-  left: 8px;
+  left: 5px;
   top: 50%;
-  border-left: 0;
-  border-right: 8px solid #fff;
   transform: translateY(-50%);
 }
 
 .joy-dir.right {
-  right: 8px;
+  right: 5px;
   top: 50%;
-  border-right: 0;
-  border-left: 8px solid #fff;
   transform: translateY(-50%);
 }
 
-.joystick.dir-up .joy-dir.up,
-.joystick.dir-down .joy-dir.down,
-.joystick.dir-left .joy-dir.left,
-.joystick.dir-right .joy-dir.right {
+.joystick.dir-up .joy-dir.up {
   opacity: 1;
-  filter: drop-shadow(0 0 5px rgba(255, 209, 102, 0.9));
+  color: #ffffff;
+  transform: translateX(-50%) scale(1.35);
+  text-shadow: 0 0 12px #ffb02e, 0 0 24px #ff7a18;
 }
 
-.joystick.dir-up .joy-dir.up { border-bottom-color: var(--gold); }
-.joystick.dir-down .joy-dir.down { border-top-color: var(--gold); }
-.joystick.dir-left .joy-dir.left { border-right-color: var(--gold); }
-.joystick.dir-right .joy-dir.right { border-left-color: var(--gold); }
+.joystick.dir-down .joy-dir.down {
+  opacity: 1;
+  color: #ffffff;
+  transform: translateX(-50%) scale(1.35);
+  text-shadow: 0 0 12px #ffb02e, 0 0 24px #ff7a18;
+}
+
+.joystick.dir-left .joy-dir.left {
+  opacity: 1;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.35);
+  text-shadow: 0 0 12px #ffb02e, 0 0 24px #ff7a18;
+}
+
+.joystick.dir-right .joy-dir.right {
+  opacity: 1;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.35);
+  text-shadow: 0 0 12px #ffb02e, 0 0 24px #ff7a18;
+}
 
 .joystick-knob {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 52px;
-  height: 52px;
+  width: 58px;
+  height: 58px;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(255, 209, 102, 0.55);
+  border: 2px solid #ffffff;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 36%, rgba(255, 220, 150, 0.5), rgba(255, 176, 46, 0.18) 52%, rgba(8, 10, 22, 0.5));
-  box-shadow: 0 0 18px rgba(255, 176, 46, 0.2);
-  transition: transform 0.26s cubic-bezier(0.2, 1.2, 0.4, 1), box-shadow 0.15s ease;
+  background:
+    radial-gradient(circle at 38% 34%, #fff1c5 0%, #ffaa22 45%, #d15600 78%, #7c2600 100%);
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.85),
+    0 0 22px rgba(255, 145, 0, 0.7),
+    inset 0 2px 4px rgba(255, 255, 255, 0.85),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.65);
+  transition: transform 0.22s cubic-bezier(0.18, 1.25, 0.35, 1);
+  will-change: transform;
 }
 
 .joystick.active .joystick-knob {
-  transition: box-shadow 0.15s ease;
-  box-shadow: 0 0 26px rgba(255, 176, 46, 0.5);
+  transition: none !important;
+  border-color: #fff7d6;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.9),
+    0 0 32px rgba(255, 175, 40, 0.95),
+    inset 0 2px 5px rgba(255, 255, 255, 0.95),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.7);
+}
+
+.knob-cap {
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, 0.7);
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.28), transparent 70%);
 }
 
 .joystick-label {
   position: absolute;
-  bottom: -18px;
+  bottom: -22px;
   left: 50%;
   transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 7px;
-  font-weight: 800;
+  color: rgba(255, 215, 130, 0.85);
+  font-size: 10px;
+  font-weight: 900;
   letter-spacing: 0.16em;
   white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .joystick.active .joystick-label {
-  opacity: 0;
+  opacity: 0.25;
 }
 
 .touch-buttons {
@@ -2705,12 +2827,26 @@ main#screens {
     font-size: 11px;
   }
 
-  /* Bottom-left is occupied by the joystick; keep Leave under the right HUD. */
-  .forfeit-btn {
-    top: clamp(104px, 30dvh, 120px);
-    right: max(10px, env(safe-area-inset-right));
+  /* Bottom-left is occupied by the joystick; keep Leave & Fullscreen under the right HUD. */
+  .hud-action-row {
+    position: absolute;
+    top: clamp(96px, 26dvh, 120px);
+    right: max(12px, env(safe-area-inset-right));
     bottom: auto;
     left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .hud-fullscreen-btn,
+  .forfeit-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -3403,14 +3539,15 @@ main#screens {
 
   .game-frame {
     width: 100%;
+    height: 100%;
     max-height: 100dvh;
     border-radius: 0;
-    border-right: 0;
-    border-left: 0;
+    border: none;
   }
 
   #screen-game {
     padding: 0;
+    margin: 0;
   }
 }
 
